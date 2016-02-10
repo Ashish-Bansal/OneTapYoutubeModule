@@ -13,6 +13,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class YoutubeMediaHook implements IXposedHookLoadPackage {
     private static final String ACTION_SAVE_YOUTUBE_URI = "com.phantom.onetapvideodownload.action.saveyoutubeurl";
+    private static final String ONE_TAP_PACKAGE_NAME = "com.phantom.onetapvideodownload";
     private static final String PACKAGE_NAME = "com.google.android.youtube";
     private static final String CLASS_NAME = "com.phantom.onetapvideodownload.IpcService";
     private static final String EXTRA_PARAM_STRING = "com.phantom.onetapvideodownload.extra.url";
@@ -28,7 +29,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         applicationMap.put(108553, new YouTubePackage("jmv", "oae"));
         applicationMap.put(102555, new YouTubePackage("hux", "lkq"));
         applicationMap.put(103457, new YouTubePackage("idv", "mpj"));
-        applicationMap.put(110156, new YouTubePackage("ktt", "pgk"));
+        applicationMap.put(110156, new YouTubePackage("com.google.android.libraries.youtube.innertube.model.media.FormatStreamModel", "com.google.android.libraries.youtube.proto.nano.InnerTubeApi.FormatStream"));
         applicationMap.put(108058, new YouTubePackage("jcw", "noc"));
         applicationMap.put(102952, new YouTubePackage("hxz", "lsy"));
         applicationMap.put(103351, new YouTubePackage("ift", "mkx"));
@@ -65,7 +66,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
                 XposedBridge.log(paramString);
 
                 Intent intent = new Intent(ACTION_SAVE_YOUTUBE_URI);
-                intent.setClassName(PACKAGE_NAME, CLASS_NAME);
+                intent.setClassName(ONE_TAP_PACKAGE_NAME, CLASS_NAME);
                 intent.putExtra(EXTRA_PARAM_STRING, paramString);
                 context.startService(intent);
             }
