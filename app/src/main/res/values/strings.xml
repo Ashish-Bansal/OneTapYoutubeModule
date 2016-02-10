@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">One Tap Youtube Module</string>
+    <string name="app_description">Allows downloading youtube videos. It requires One Tap Video Download to work.</string>
+</resources>
