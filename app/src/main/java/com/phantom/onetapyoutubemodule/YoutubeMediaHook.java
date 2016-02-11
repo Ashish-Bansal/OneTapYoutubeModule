@@ -17,9 +17,12 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
     private static final String PACKAGE_NAME = "com.google.android.youtube";
     private static final String CLASS_NAME = "com.phantom.onetapvideodownload.IpcService";
     private static final String EXTRA_PARAM_STRING = "com.phantom.onetapvideodownload.extra.url";
+    private static final String ORIGINAL_MAIN_CLASS_NAME = "com.google.android.libraries.youtube.innertube.model.media.FormatStreamModel";
+    private static final String ORIGINAL_METHOD_CLASS_NAME = "com.google.android.libraries.youtube.proto.nano.InnerTubeApi.FormatStream";
     private static final HashMap<Integer, YouTubePackage> applicationMap = new HashMap<>();
     private static long lastVideoTime = System.currentTimeMillis();
     static {
+        applicationMap.put(0, new YouTubePackage(ORIGINAL_MAIN_CLASS_NAME, ORIGINAL_METHOD_CLASS_NAME));
         applicationMap.put(108358, new YouTubePackage("jci", "noo"));
         applicationMap.put(107756, new YouTubePackage("ipz", "myv"));
         applicationMap.put(108754, new YouTubePackage("knr", "pkl"));
@@ -29,7 +32,6 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         applicationMap.put(108553, new YouTubePackage("jmv", "oae"));
         applicationMap.put(102555, new YouTubePackage("hux", "lkq"));
         applicationMap.put(103457, new YouTubePackage("idv", "mpj"));
-        applicationMap.put(110156, new YouTubePackage("com.google.android.libraries.youtube.innertube.model.media.FormatStreamModel", "com.google.android.libraries.youtube.proto.nano.InnerTubeApi.FormatStream"));
         applicationMap.put(108058, new YouTubePackage("jcw", "noc"));
         applicationMap.put(102952, new YouTubePackage("hxz", "lsy"));
         applicationMap.put(103351, new YouTubePackage("ift", "mkx"));
@@ -44,8 +46,17 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         return (Context) XposedHelpers.callMethod(activityThread, "getSystemContext");
     }
 
-    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam paramLoadPackageParam) throws Throwable {
-        if (!paramLoadPackageParam.packageName.equals(PACKAGE_NAME)) {
+    public boolean findClass(ClassLoader loader, String className) {
+        try {
+            loader.loadClass(className);
+            return true;
+        } catch( ClassNotFoundException e ) {
+            return false;
+        }
+    }
+
+    public void handleLoadPackage(final XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+        if (!lpparam.packageName.equals(PACKAGE_NAME)) {
             return;
         }
 
@@ -53,6 +64,8 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         // public MainClass(MethodParameterClass paramJlb, String paramString, long paramLong)
 
         final Context context = getContext();
+        final ClassLoader loader = lpparam.classLoader;
+        boolean isNotObfuscated = findClass(loader, ORIGINAL_MAIN_CLASS_NAME);
 
         final XC_MethodHook methodHook = new XC_MethodHook() {
             protected void afterHookedMethod(XC_MethodHook.MethodHookParam hookParams) throws Throwable {
@@ -73,23 +86,29 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         };
 
         int packageVersion = context.getPackageManager()
-                .getPackageInfo(paramLoadPackageParam.packageName, 0).versionCode;
+                .getPackageInfo(lpparam.packageName, 0).versionCode;
 
         XposedBridge.log("Youtube Package version : " + packageVersion);
 
-        YouTubePackage currentPackage = applicationMap.get(getSignificantDigits(packageVersion));
+        YouTubePackage currentPackage;
+        if (isNotObfuscated) {
+            currentPackage = applicationMap.get(0);
+        } else {
+            currentPackage = applicationMap.get(getSignificantDigits(packageVersion));
+        }
+
         if (currentPackage == null) {
             XposedBridge.log("Version Class names not found. Please contact developer to get support for this package");
             return;
         }
 
-        Class mainClass = XposedHelpers.findClass(currentPackage.getMainClass(), paramLoadPackageParam.classLoader);
+        Class mainClass = XposedHelpers.findClass(currentPackage.getMainClass(), lpparam.classLoader);
 
         XposedBridge.log("Hooking constructor");
-
         XposedBridge.log(currentPackage.getMethodParameterClass());
+
         Object [] objects = new Object[] {
-                XposedHelpers.findClass(currentPackage.getMethodParameterClass(), paramLoadPackageParam.classLoader),
+                XposedHelpers.findClass(currentPackage.getMethodParameterClass(), lpparam.classLoader),
                 String.class,
                 Long.TYPE,
                 methodHook
