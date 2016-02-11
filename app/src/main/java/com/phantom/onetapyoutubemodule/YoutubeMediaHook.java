@@ -39,6 +39,18 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         applicationMap.put(110354, new YouTubePackage("lkn", "qcf"));
         applicationMap.put(101855, new YouTubePackage("gmg", "jlb"));
         applicationMap.put(103155, new YouTubePackage("ibx", "map"));
+        applicationMap.put(101653, new YouTubePackage("gin", "jda"));
+        applicationMap.put(101253, new YouTubePackage("gfl", "iur"));
+        applicationMap.put(100203, new YouTubePackage("fmo", "hoi"));
+        applicationMap.put(110153, new YouTubePackage("kts", "pgj"));
+        applicationMap.put(102455, new YouTubePackage("hfz", "ktr"));
+        applicationMap.put(100506, new YouTubePackage("fwc", "ibn"));
+        applicationMap.put(100305, new YouTubePackage("foe", "hrf"));
+        applicationMap.put(100405, new YouTubePackage("ftp", "hxs"));
+        applicationMap.put(103553, new YouTubePackage("lkn", "qcf"));
+        applicationMap.put(100852, new YouTubePackage("geg", "iny"));
+        applicationMap.put(108957, new YouTubePackage("kqo", "pqh"));
+        applicationMap.put(101052, new YouTubePackage("gfg", "ise"));
     }
 
     public Context getContext() {
