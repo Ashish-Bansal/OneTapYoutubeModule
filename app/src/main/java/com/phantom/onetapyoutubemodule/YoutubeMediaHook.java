@@ -101,7 +101,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         int packageVersion = context.getPackageManager()
                 .getPackageInfo(lpparam.packageName, 0).versionCode;
 
-        XposedBridge.log("Youtube Package version : " + packageVersion);
+        XposedBridge.log("OneTapVideoDownload : Youtube Package version : " + packageVersion);
 
         YouTubePackage currentPackage;
         if (isNotObfuscated) {
@@ -122,7 +122,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
             if (bestMatchedKey == -1
                     || !findClass(loader, currentPackage.getMainClass())
                     || !findClass(loader, currentPackage.getMethodParameterClass())) {
-                XposedBridge.log("Class names not found for this youtube version. " +
+                XposedBridge.log("OneTapVideoDownload : Class names not found for this youtube version. " +
                         "Please contact developer to get support for this package");
                 return;
             }
@@ -130,7 +130,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
 
         Class mainClass = XposedHelpers.findClass(currentPackage.getMainClass(), lpparam.classLoader);
 
-        XposedBridge.log("Hooking constructor : " + currentPackage.getMainClass());
+        XposedBridge.log("OneTapVideoDownload : Hooking constructor : " + currentPackage.getMainClass());
         XposedBridge.log(currentPackage.getMethodParameterClass());
 
         Object [] objects = new Object[] {
