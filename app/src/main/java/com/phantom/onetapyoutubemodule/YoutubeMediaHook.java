@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
@@ -98,13 +99,26 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         }
 
         if (currentPackage == null) {
-            XposedBridge.log("Version Class names not found. Please contact developer to get support for this package");
-            return;
+            int bestMatchedKey = -1, temp = Integer.MAX_VALUE;
+            for (Map.Entry<Integer, YouTubePackage> pair : applicationMap.entrySet()) {
+                if (packageVersion - pair.getKey() < temp && packageVersion > pair.getKey()) {
+                    bestMatchedKey = pair.getKey();
+                    temp = packageVersion - bestMatchedKey;
+                }
+            }
+
+            if (bestMatchedKey == -1
+                    || !findClass(loader, currentPackage.getMainClass())
+                    || !findClass(loader, currentPackage.getMethodParameterClass())) {
+                XposedBridge.log("Class names not found for this youtube version. " +
+                        "Please contact developer to get support for this package");
+                return;
+            }
         }
 
         Class mainClass = XposedHelpers.findClass(currentPackage.getMainClass(), lpparam.classLoader);
 
-        XposedBridge.log("Hooking constructor");
+        XposedBridge.log("Hooking constructor : " + currentPackage.getMainClass());
         XposedBridge.log(currentPackage.getMethodParameterClass());
 
         Object [] objects = new Object[] {
