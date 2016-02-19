@@ -83,7 +83,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         final XC_MethodHook methodHook = new XC_MethodHook() {
             protected void afterHookedMethod(XC_MethodHook.MethodHookParam hookParams) throws Throwable {
                 long currentTime = System.currentTimeMillis();
-                if (currentTime - lastVideoTime < 1000L) {
+                if (currentTime - lastVideoTime < 1200L) {
                     return;
                 }
 
