@@ -15,17 +15,3 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-
-
--optimizations !code/simplification/cast,!code/allocation/*,!field/*,!class/merging/*
--optimizationpasses 5
--allowaccessmodification
--dontpreverify
--dontusemixedcaseclassnames
--dontskipnonpubliclibraryclasses
--dontwarn **
--microedition
-
--keep class com.phantom.onetapyoutubemodule.YoutubeMediaHook { *; }
--keep class de.robv.** { *; }
-
