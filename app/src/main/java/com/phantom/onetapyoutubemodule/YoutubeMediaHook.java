@@ -13,11 +13,16 @@ import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class YoutubeMediaHook implements IXposedHookLoadPackage {
-    private static final String ACTION_SAVE_YOUTUBE_URI = "com.phantom.onetapvideodownload.action.saveyoutubeurl";
+    private static final String ACTION_SAVE_YOUTUBE_VIDEO = "com.phantom.onetapvideodownload.action.saveyoutubeurl";
+    private static final String ACTION_SEND_NOTIFICATION_FOR_EMAIL = "com.phantom.onetapvideodownload.action.sendemail";
     private static final String ONE_TAP_PACKAGE_NAME = "com.phantom.onetapvideodownload";
     private static final String PACKAGE_NAME = "com.google.android.youtube";
     private static final String CLASS_NAME = "com.phantom.onetapvideodownload.IpcService";
     private static final String EXTRA_PARAM_STRING = "com.phantom.onetapvideodownload.extra.url";
+    public static final String EXTRA_NOTIFICATION_TITLE = PACKAGE_NAME + ".extra.notification_title";
+    public static final String EXTRA_NOTIFICATION_BODY = PACKAGE_NAME + ".extra.notification_body";
+    public static final String EXTRA_EMAIL_SUBJECT = PACKAGE_NAME + ".extra.email_subject";
+    public static final String EXTRA_EMAIL_BODY = PACKAGE_NAME + ".extra.email_body";
     private static final String ORIGINAL_MAIN_CLASS_NAME = "com.google.android.libraries.youtube.innertube.model.media.FormatStreamModel";
     private static final String ORIGINAL_METHOD_CLASS_NAME = "com.google.android.libraries.youtube.proto.nano.InnerTubeApi.FormatStream";
     private static final HashMap<Integer, YouTubePackage> applicationMap = new HashMap<>();
@@ -92,7 +97,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
                 String paramString = (String)hookParams.args[1];
                 XposedBridge.log(paramString);
 
-                Intent intent = new Intent(ACTION_SAVE_YOUTUBE_URI);
+                Intent intent = new Intent(ACTION_SAVE_YOUTUBE_VIDEO);
                 intent.setClassName(ONE_TAP_PACKAGE_NAME, CLASS_NAME);
                 intent.putExtra(EXTRA_PARAM_STRING, paramString);
                 context.startService(intent);
@@ -126,6 +131,14 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
             if (!supported) {
                 XposedBridge.log("OneTapVideoDownload : Class names not found for this youtube version. " +
                         "Please contact developer to get support for this package");
+
+                Intent intent = new Intent(ACTION_SEND_NOTIFICATION_FOR_EMAIL);
+                intent.setClassName(ONE_TAP_PACKAGE_NAME, CLASS_NAME);
+                intent.putExtra(EXTRA_NOTIFICATION_TITLE, "Youtube Module not supported");
+                intent.putExtra(EXTRA_NOTIFICATION_BODY, "Please click to send this information to the developer");
+                intent.putExtra(EXTRA_EMAIL_SUBJECT, "Youtube module not supported");
+                intent.putExtra(EXTRA_EMAIL_BODY, "Youtube module is not supported. Youtube version : " + packageVersion);
+                context.startService(intent);
                 return;
             }
         }
