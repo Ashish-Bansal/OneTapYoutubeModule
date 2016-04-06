@@ -112,17 +112,18 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         }
 
         if (currentPackage == null) {
-            int bestMatchedKey = -1, temp = Integer.MAX_VALUE;
+            boolean supported = false;
             for (Map.Entry<Integer, YouTubePackage> pair : applicationMap.entrySet()) {
-                if (packageVersion - pair.getKey() < temp && packageVersion > pair.getKey()) {
-                    bestMatchedKey = pair.getKey();
-                    temp = packageVersion - bestMatchedKey;
+                boolean mainClassFound = findClass(lpparam.classLoader, pair.getValue().getMainClass());
+                boolean parameterClassFound = findClass(lpparam.classLoader, pair.getValue().getMethodParameterClass());
+                if (mainClassFound && parameterClassFound) {
+                    currentPackage = pair.getValue();
+                    supported = true;
+                    break;
                 }
             }
 
-            if (bestMatchedKey == -1
-                    || !findClass(loader, currentPackage.getMainClass())
-                    || !findClass(loader, currentPackage.getMethodParameterClass())) {
+            if (!supported) {
                 XposedBridge.log("OneTapVideoDownload : Class names not found for this youtube version. " +
                         "Please contact developer to get support for this package");
                 return;
