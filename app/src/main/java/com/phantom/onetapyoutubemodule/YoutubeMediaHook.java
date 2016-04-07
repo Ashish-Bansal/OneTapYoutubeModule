@@ -19,10 +19,10 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
     private static final String PACKAGE_NAME = "com.google.android.youtube";
     private static final String CLASS_NAME = "com.phantom.onetapvideodownload.IpcService";
     private static final String EXTRA_PARAM_STRING = "com.phantom.onetapvideodownload.extra.url";
-    public static final String EXTRA_NOTIFICATION_TITLE = PACKAGE_NAME + ".extra.notification_title";
-    public static final String EXTRA_NOTIFICATION_BODY = PACKAGE_NAME + ".extra.notification_body";
-    public static final String EXTRA_EMAIL_SUBJECT = PACKAGE_NAME + ".extra.email_subject";
-    public static final String EXTRA_EMAIL_BODY = PACKAGE_NAME + ".extra.email_body";
+    private static final String EXTRA_NOTIFICATION_TITLE = PACKAGE_NAME + ".extra.notification_title";
+    private static final String EXTRA_NOTIFICATION_BODY = PACKAGE_NAME + ".extra.notification_body";
+    private static final String EXTRA_EMAIL_SUBJECT = PACKAGE_NAME + ".extra.email_subject";
+    private static final String EXTRA_EMAIL_BODY = PACKAGE_NAME + ".extra.email_body";
     private static final String ORIGINAL_MAIN_CLASS_NAME = "com.google.android.libraries.youtube.innertube.model.media.FormatStreamModel";
     private static final String ORIGINAL_METHOD_CLASS_NAME = "com.google.android.libraries.youtube.proto.nano.InnerTubeApi.FormatStream";
     private static final HashMap<Integer, YouTubePackage> applicationMap = new HashMap<>();
@@ -117,21 +117,21 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         }
 
         if (currentPackage == null) {
-            boolean supported = false;
+            XposedBridge.log("One Tap Video Download : Trying bruteforcing");
+            boolean successful = false;
             for (Map.Entry<Integer, YouTubePackage> pair : applicationMap.entrySet()) {
-                boolean mainClassFound = findClass(lpparam.classLoader, pair.getValue().getMainClass());
-                boolean parameterClassFound = findClass(lpparam.classLoader, pair.getValue().getMethodParameterClass());
-                if (mainClassFound && parameterClassFound) {
-                    currentPackage = pair.getValue();
-                    supported = true;
+                String mainClassName = pair.getValue().getMainClass();
+                String parameterClassName = pair.getValue().getMethodParameterClass();
+                successful = hookYoutube(lpparam.classLoader, methodHook, mainClassName,
+                        parameterClassName);
+                if (successful) {
                     break;
                 }
             }
 
-            if (!supported) {
+            if (!successful) {
                 XposedBridge.log("OneTapVideoDownload : Class names not found for this youtube version. " +
                         "Please contact developer to get support for this package");
-
                 Intent intent = new Intent(ACTION_SEND_NOTIFICATION_FOR_EMAIL);
                 intent.setClassName(ONE_TAP_PACKAGE_NAME, CLASS_NAME);
                 intent.putExtra(EXTRA_NOTIFICATION_TITLE, "Youtube Module not supported");
@@ -139,23 +139,30 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
                 intent.putExtra(EXTRA_EMAIL_SUBJECT, "Youtube module not supported");
                 intent.putExtra(EXTRA_EMAIL_BODY, "Youtube module is not supported. Youtube version : " + packageVersion);
                 context.startService(intent);
-                return;
             }
+        } else {
+            String mainClassName = currentPackage.getMainClass();
+            String parameterClassName = currentPackage.getMethodParameterClass();
+            hookYoutube(lpparam.classLoader, methodHook, mainClassName, parameterClassName);
         }
+    }
 
-        Class mainClass = XposedHelpers.findClass(currentPackage.getMainClass(), lpparam.classLoader);
-
-        XposedBridge.log("OneTapVideoDownload : Hooking constructor : " + currentPackage.getMainClass());
-        XposedBridge.log(currentPackage.getMethodParameterClass());
-
-        Object [] objects = new Object[] {
-                XposedHelpers.findClass(currentPackage.getMethodParameterClass(), lpparam.classLoader),
-                String.class,
-                Long.TYPE,
-                methodHook
-        };
-
-        XposedHelpers.findAndHookConstructor(mainClass,  objects);
+    private boolean hookYoutube(ClassLoader classLoader, XC_MethodHook methodHook,
+                                String mainClassName, String parameterClassName) {
+        try {
+            Class mainClass = XposedHelpers.findClass(mainClassName, classLoader);
+            Object[] objects = new Object[]{
+                    XposedHelpers.findClass(parameterClassName, classLoader),
+                    String.class,
+                    Long.TYPE,
+                    methodHook
+            };
+            XposedHelpers.findAndHookConstructor(mainClass, objects);
+        } catch (Exception e) {
+            return false;
+        }
+        XposedBridge.log("OneTapVideoDownload : Successful Hooking : " + mainClassName);
+        return true;
     }
 
     private int getSignificantDigits(int version) {
