@@ -8,9 +8,10 @@ android {
         applicationId "com.phantom.onetapyoutubemodule"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 7
-        versionName "1.6"
+        versionCode 17
+        versionName "2.7"
     }
+
     buildTypes {
         debug {
             zipAlignEnabled true
