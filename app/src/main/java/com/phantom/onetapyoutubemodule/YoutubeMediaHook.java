@@ -158,7 +158,7 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
                     methodHook
             };
             XposedHelpers.findAndHookConstructor(mainClass, objects);
-        } catch (Exception e) {
+        } catch (Exception | NoSuchMethodError e) {
             return false;
         }
         XposedBridge.log("OneTapVideoDownload : Successful Hooking : " + mainClassName);
