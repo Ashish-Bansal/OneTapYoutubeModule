@@ -8,8 +8,8 @@ android {
         applicationId "com.phantom.onetapyoutubemodule"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 18
-        versionName "2.8"
+        versionCode 22
+        versionName "3.2"
     }
 
     buildTypes {
