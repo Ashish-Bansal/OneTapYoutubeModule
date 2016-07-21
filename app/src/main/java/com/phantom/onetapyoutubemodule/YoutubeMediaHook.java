@@ -68,6 +68,8 @@ public class YoutubeMediaHook implements IXposedHookLoadPackage {
         applicationMap.put(112254, new YouTubePackage("niz", "tbz"));
         applicationMap.put(112356, new YouTubePackage("niv", "tcp"));
         applicationMap.put(112555, new YouTubePackage("nlk", "tht"));
+        applicationMap.put(112559, new YouTubePackage("nlk", "tht"));
+        applicationMap.put(112753, new YouTubePackage("nms", "tlb"));
     }
 
     public Context getContext() {
